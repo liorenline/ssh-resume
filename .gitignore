@@ -1,4 +1,4 @@
-ssh-resume
+.ssh/
 *.exe
 dist/
 .env
