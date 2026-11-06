@@ -8,8 +8,11 @@ import (
 	"syscall"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
+	"github.com/charmbracelet/wish/activeterm"
+	bm "github.com/charmbracelet/wish/bubbletea"
 	"github.com/charmbracelet/wish/logging"
 )
 
@@ -18,13 +21,8 @@ func main() {
 		wish.WithAddress("localhost:2222"),
 		wish.WithHostKeyPath(".ssh/host_ed25519"),
 		wish.WithMiddleware(
-			func(next ssh.Handler) ssh.Handler {
-				return func(sess ssh.Session) {
-					wish.Println(sess, "Hi, I'm Iva")
-					wish.Println(sess, "This is my resume. More coming soon!")
-					next(sess)
-				}
-			},
+			bm.Middleware(teaHandler),
+			activeterm.Middleware(),
 			logging.Middleware(),
 		),
 	)
@@ -42,4 +40,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	s.Shutdown(ctx)
+}
+func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+	return initialModel(), []tea.ProgramOption{tea.WithAltScreen()}
 }
